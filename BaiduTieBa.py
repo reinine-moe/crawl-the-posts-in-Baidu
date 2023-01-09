@@ -1,6 +1,7 @@
 from urllib import request
 import re
-
+import time
+import random
 
 class BaiduTieBa:
     def __init__(self, baseURL, seeLZ):
@@ -13,7 +14,6 @@ class BaiduTieBa:
             url      = self.baseURL + self.seeLZ + '&pn=' + str(pageNum)
             requests = request.Request(url, headers=headers)
             response = request.urlopen(requests)
-            # response = request.urlopen(url)
             html     = response.read().decode('utf-8')
             return html
         except:
@@ -30,9 +30,20 @@ class BaiduTieBa:
         else:
             return f'获取标题失败'
 
+    # 获取帖子的总页数
+    def fetchTotalPage(self):
+        page    = self.fetchPage()
+        pattern = re.compile(r'(?<=<span class="red">)\d*(?=</span>)')
+        result  = re.search(pattern, page)
+        if result:
+            totalPage = int(result.group()) // 2
+            return totalPage
+        else:
+            return f'获取页数失败'
+
 
 if __name__ == '__main__':
-    originURL = 'https://tieba.baidu.com/p/6802656129'
+    originURL = 'https://tieba.baidu.com/p/8179625573?frwh=index'
     headers   = {'User-Agent'     : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                                     'Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.54',
                  'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,zh-TW;q=0.5',
@@ -42,5 +53,8 @@ if __name__ == '__main__':
                                     'BIDUPSID=95312DF85A14760C5DA6F73C54207CCC; '
                  }
     post01    = BaiduTieBa(originURL, 0)
-    print(post01.fetchTitle())
-    # print(post01.fetchPage())
+    method    = [post01.fetchTitle, post01.fetchTotalPage]
+    
+    for i in method:
+        print(i())
+        time.sleep(random.randrange(1,3) * 0.1)
