@@ -1,8 +1,25 @@
 from headers import headers
 from urllib import request
 import re
-import time
-import random
+
+
+class Tools:
+    # 替换BR标签为\n
+    replaceBR         = re.compile('<br><br>|<br>')
+    # 保留图片
+    replaceImgPrefix  = re.compile('<img class="BDE_Image".*?src="')
+    replaceImgSuffix  = re.compile('" size=.*?>')
+    # 删除贴吧emoji
+    removeEmoji       = re.compile('<img class="BDE_Smiley".*?src=".*?" >')
+
+    def replace(self, item):
+        item = re.sub(self.replaceBR, '\n', item)
+        item = re.sub(self.replaceImgPrefix, ' ', item)
+        item = re.sub(self.replaceImgSuffix, '', item)
+        item = re.sub(self.removeEmoji, '', item)
+        if item == '':
+            return 'emoji'
+        return item
 
 
 class BaiduTieBa:
@@ -35,10 +52,10 @@ class BaiduTieBa:
     # 获取帖子的总页数
     def fetchTotalPage(self):
         page    = self.fetchPage()
-        pattern = re.compile(r'(?<=<span class="red">)\d*(?=</span>)')
+        pattern = re.compile(r'(?<=共<span class="red">)\d*(?=</span>页)')
         result  = re.search(pattern, page)
         if result:
-            totalPage = int(result.group()) // 2
+            totalPage = int(result.group())
             return totalPage
         else:
             return f'获取页数失败'
@@ -50,10 +67,8 @@ class BaiduTieBa:
 
 # 测试
 if __name__ == '__main__':
-    originURL = 'https://tieba.baidu.com/p/8179625573?frwh=index'
+    originURL = 'https://tieba.baidu.com/p/8101474840'
     post01    = BaiduTieBa(originURL, 0)
     method    = [post01.fetchTitle, post01.fetchTotalPage]
 
-    for i in method:
-        print(i())
-        time.sleep(random.randrange(1, 3) * 0.1)
+    print(post01.fetchPage())
