@@ -1,6 +1,5 @@
 from headers import headers
 from urllib import request
-import random
 import time
 import re
 
@@ -16,7 +15,7 @@ class Tools:
     # 删除贴吧表情
     removeEmoji       = re.compile('<img class="BDE_Smiley".*?src=".*?" >')
     # 删除装扮框
-    removeChatBox    = re.compile('<div class=.*?>')
+    removeChatBox     = re.compile('<div class=.*?>')
 
     def replace(self, item):
         item = re.sub(self.replaceBR       , '\n', item)
@@ -31,6 +30,9 @@ class Tools:
 
 
 class BaiduTieBa:
+    point   = '.'
+    counter = 1
+
     def __init__(self, baseURL, seeLZ):
         self.baseURL = baseURL
         self.seeLZ   = '?see_lz=' + str(seeLZ)
@@ -44,17 +46,21 @@ class BaiduTieBa:
                 response = request.urlopen(requests)
                 html     = response.read().decode('utf-8')
                 if '百度安全验证' in html:
-                    print('百度安全验证，正在重新获取网页...')
-                    time.sleep(random.randrange(2, 5) * 0.1)
+                    # 加载条
+                    print('\r百度安全验证，正在重新获取网页', self.point * self.counter, end='')
+                    self.counter += 1
+                    if self.counter == 4:
+                        self.counter = 1
+                    time.sleep(0.5)
                 else:
                     return html
             except:
-                print('连接失败')
+                print('\n连接失败')
                 return None
 
     # 获取帖子的标题
-    def fetchTitle(self):
-        page    = self.fetchPage(1)
+    @staticmethod
+    def fetchTitle(page):
         pattern = re.compile(r'(?<=<title>).*(?=_百度贴吧)')
         result  = re.search(pattern, page)
         if result:
@@ -63,8 +69,8 @@ class BaiduTieBa:
             return f'获取标题失败'
 
     # 获取帖子的总页数
-    def fetchTotalPage(self):
-        page    = self.fetchPage(1)
+    @staticmethod
+    def fetchTotalPage(page):
         pattern = re.compile(r'(?<=共<span class="red">)\d*(?=</span>页)')
         result  = re.search(pattern, page)
         if result:
@@ -76,11 +82,3 @@ class BaiduTieBa:
     # 查看楼层信息
     def fetchFloorInfo(self):
         pass
-
-
-# 测试
-if __name__ == '__main__':
-    originURL = 'https://tieba.baidu.com/p/8101474840'
-    post01    = BaiduTieBa(originURL, 0)
-
-    print(post01.fetchPage(1))
