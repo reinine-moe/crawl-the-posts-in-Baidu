@@ -1,5 +1,4 @@
 from BaiduTieBa import *
-import re
 
 
 class Posts(BaiduTieBa, Tools):
@@ -8,7 +7,7 @@ class Posts(BaiduTieBa, Tools):
 
     # 获取回复帖内容
     def fetchComments(self, page):
-        extractPostPattern     = re.compile(r'(?<=content " style="display:;">\s{20})|'
+        extractPostPattern     = re.compile(r'(?<=content " style="display:;">\s{20}).*(?=</div><br>)|'
                                             r'(?<=content\s\sclearfix" style="display:;">\s{12}).*(?=</div><br>)')
         unextractedPostsList   = re.findall(extractPostPattern, page)                    # 将初步筛选后的帖放进列表
         postsList              = [Tools.replace(self, p) for p in unextractedPostsList]  # 将完全筛选后的帖放进列表
